@@ -1,4 +1,4 @@
-// 🚀 LEVEL UP Production Backend with Real Google OAuth + Debug
+// 🚀 LEVEL UP Production Backend with Real Google OAuth + HTTPS Fix
 // Deploy this to Render Web Service - SECURE VERSION
 
 const express = require('express');
@@ -45,11 +45,11 @@ if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
 let users = [];
 let mockTests = [];
 
-// 🔐 Google OAuth Strategy
+// 🔐 Google OAuth Strategy - FIXED WITH HTTPS CALLBACK URL
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
+  callbackURL: "https://levelup-backend-api.onrender.com/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // Check if user exists
@@ -99,10 +99,10 @@ passport.deserializeUser((id, done) => {
 app.get('/', (req, res) => {
   res.json({
     status: 'LEVEL UP Backend API Running',
-    version: '2.0.0',
+    version: '2.0.1',
     environment: process.env.NODE_ENV || 'development',
     features: [
-      'Real Google OAuth',
+      'Real Google OAuth with HTTPS',
       'JWT Authentication', 
       'Mock Test Analytics',
       'Leaderboard System',
@@ -112,6 +112,10 @@ app.get('/', (req, res) => {
       totalUsers: users.length,
       totalTests: mockTests.length,
       uptime: process.uptime()
+    },
+    oauth: {
+      callbackURL: "https://levelup-backend-api.onrender.com/auth/google/callback",
+      clientConfigured: !!GOOGLE_CLIENT_ID
     }
   });
 });
@@ -127,6 +131,7 @@ app.get('/debug', (req, res) => {
     secretPrefix: GOOGLE_CLIENT_SECRET ? GOOGLE_CLIENT_SECRET.substring(0, 10) + '...' : 'NOT_SET',
     frontendUrl: FRONTEND_URL,
     nodeEnv: process.env.NODE_ENV,
+    callbackURL: "https://levelup-backend-api.onrender.com/auth/google/callback",
     allEnvVars: Object.keys(process.env).filter(key => key.includes('GOOGLE') || key.includes('JWT') || key.includes('FRONTEND')),
     timestamp: new Date().toISOString()
   });
@@ -463,8 +468,9 @@ function calculateWeeklyProgress(tests) {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 LEVEL UP Production Backend running on port ${PORT}`);
-  console.log(`🔐 Real Google OAuth enabled`);
+  console.log(`🔐 Real Google OAuth enabled with HTTPS callback`);
   console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
+  console.log(`🔗 OAuth Callback: https://levelup-backend-api.onrender.com/auth/google/callback`);
   console.log(`👥 Users: ${users.length} | 📝 Tests: ${mockTests.length}`);
   console.log(`🔧 Debug endpoint available at /debug`);
 });
