@@ -1,4 +1,4 @@
-// 🚀 LEVEL UP Production Backend with Real Google OAuth
+// 🚀 LEVEL UP Production Backend with Real Google OAuth + Debug
 // Deploy this to Render Web Service - SECURE VERSION
 
 const express = require('express');
@@ -36,6 +36,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL || 'https://app.legalight.org.in';
 // Validate required environment variables
 if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
   console.error('❌ Missing required environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET');
+  console.error('GOOGLE_CLIENT_ID exists:', !!GOOGLE_CLIENT_ID);
+  console.error('GOOGLE_CLIENT_SECRET exists:', !!GOOGLE_CLIENT_SECRET);
   process.exit(1);
 }
 
@@ -111,6 +113,22 @@ app.get('/', (req, res) => {
       totalTests: mockTests.length,
       uptime: process.uptime()
     }
+  });
+});
+
+// 🔧 DEBUG ENDPOINT - REMOVE AFTER TESTING
+app.get('/debug', (req, res) => {
+  res.json({
+    hasClientId: !!GOOGLE_CLIENT_ID,
+    clientIdLength: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.length : 0,
+    clientIdPrefix: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.substring(0, 20) + '...' : 'NOT_SET',
+    hasClientSecret: !!GOOGLE_CLIENT_SECRET,
+    secretLength: GOOGLE_CLIENT_SECRET ? GOOGLE_CLIENT_SECRET.length : 0,
+    secretPrefix: GOOGLE_CLIENT_SECRET ? GOOGLE_CLIENT_SECRET.substring(0, 10) + '...' : 'NOT_SET',
+    frontendUrl: FRONTEND_URL,
+    nodeEnv: process.env.NODE_ENV,
+    allEnvVars: Object.keys(process.env).filter(key => key.includes('GOOGLE') || key.includes('JWT') || key.includes('FRONTEND')),
+    timestamp: new Date().toISOString()
   });
 });
 
@@ -448,6 +466,7 @@ app.listen(PORT, () => {
   console.log(`🔐 Real Google OAuth enabled`);
   console.log(`🌐 Frontend URL: ${FRONTEND_URL}`);
   console.log(`👥 Users: ${users.length} | 📝 Tests: ${mockTests.length}`);
+  console.log(`🔧 Debug endpoint available at /debug`);
 });
 
 // Graceful shutdown
